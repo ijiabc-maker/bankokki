@@ -1,0 +1,283 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>万国旗メモリー</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@500;700&display=swap">
+<style>
+/* layout: 1画面ずつ切り替える中央寄せの1カラム。国旗が主役なので周りは紺と紙色だけ */
+:root{
+  --bg:#eef1f6; --surface:#ffffff; --fg:#14213d; --muted:#5b6781; --line:#c9d0de;
+  --accent:#14213d; --on-accent:#ffffff; --pick:#e8890c;
+  --good:#12805c; --bad:#c8303c; --on-mark:#ffffff;
+  --display:"Dela Gothic One","Hiragino Kaku Gothic ProN",sans-serif;
+  --body:"Zen Kaku Gothic New","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0d1426; --surface:#17213a; --fg:#eef1f8; --muted:#9aa6c2; --line:#31405f;
+  --accent:#f4f1e8; --on-accent:#0d1426; --pick:#ffab33;
+  --good:#3ccb98; --bad:#ff6b74; --on-mark:#0d1426; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0d1426; --surface:#17213a; --fg:#eef1f8; --muted:#9aa6c2; --line:#31405f;
+  --accent:#f4f1e8; --on-accent:#0d1426; --pick:#ffab33;
+  --good:#3ccb98; --bad:#ff6b74; --on-mark:#0d1426; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:500 16px/1.7 var(--body)}
+main{max-width:34rem;margin:0 auto;padding-block:20px 32px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+section{display:flex;flex-direction:column;gap:16px}
+h1,h2{font-family:var(--display);font-weight:400;margin:0;line-height:1.35;text-wrap:balance}
+h1{font-size:clamp(1.9rem,9vw,2.8rem)}
+h2{font-size:1.25rem}
+p{margin:0}
+.muted{color:var(--muted);font-size:.9rem}
+button{font:700 1rem var(--body);cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:focus-visible{outline:3px solid var(--pick);outline-offset:3px}
+.primary{background:var(--accent);color:var(--on-accent);border:0;border-radius:6px;padding:15px 20px;width:100%}
+.primary:disabled{background:var(--line);color:var(--muted);cursor:default}
+.text{background:none;border:0;color:var(--muted);text-decoration:underline;padding:8px;align-self:center;font-size:.9rem}
+.bunting{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;border-top:2px solid var(--fg);padding-top:0}
+.bunting img{display:block;width:100%;aspect-ratio:4/3;box-shadow:0 0 0 1px var(--line)}
+.bunting img:nth-child(odd){transform:translateY(6px)}
+ol{margin:0;padding:0;list-style:none;border-top:1px solid var(--line)}
+.rules li{display:flex;gap:14px;padding:10px 0;border-bottom:1px solid var(--line)}
+.rules b{font-family:var(--display);font-weight:400;min-width:3.5em}
+.head{display:flex;justify-content:space-between;align-items:baseline;gap:12px}
+.num{font-variant-numeric:tabular-nums}
+.stage{aspect-ratio:4/3;width:100%;display:grid;place-items:center;background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:6%}
+.stage img{display:block;width:100%;height:100%;object-fit:contain;filter:drop-shadow(0 0 1px rgb(0 0 0/.55))}
+.count{font:400 6rem/1 var(--display)}
+.laps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.lap{display:grid;grid-template-columns:repeat(10,1fr);gap:2px}
+.lap i{height:8px;background:var(--line)}
+.lap i.on{background:var(--pick)}
+.clock{font-weight:700;font-size:1.2rem;white-space:nowrap}
+.timebar{height:8px;background:var(--line)}
+.timebar i{display:block;height:100%;background:var(--pick);transform-origin:left}
+.hurry .clock{color:var(--bad)}
+.hurry .timebar i{background:var(--bad)}
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px 8px}
+.card{position:relative;display:block;padding:0;border:0;background:none;aspect-ratio:4/3;border-radius:2px}
+.card img{display:block;width:100%;height:100%;box-shadow:0 0 0 1px var(--line);border-radius:2px;pointer-events:none}
+.card.sel,.card.hit,.card.miss,.card.wrong{outline:3px solid var(--pick);outline-offset:2px}
+.card.hit{outline-color:var(--good)}
+.card.wrong{outline-color:var(--bad)}
+.card.miss{outline-style:dashed;outline-color:var(--good)}
+.card[data-mark]::after{content:attr(data-mark);position:absolute;right:-5px;bottom:-7px;min-width:20px;height:20px;padding:0 4px;border-radius:10px;background:var(--pick);color:var(--on-mark);font:700 12px/20px var(--body);text-align:center}
+.card.hit::after{background:var(--good)}
+.card.wrong::after{background:var(--bad)}
+.card.miss::after{background:var(--good)}
+.card.dim img{opacity:.3}
+div.card{cursor:default}
+.score{font:400 3.4rem/1.1 var(--display)}
+.answers li{display:grid;grid-template-columns:1.6em 56px 1fr auto;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.answers img{display:block;width:56px;aspect-ratio:4/3;box-shadow:0 0 0 1px var(--line)}
+.answers span{min-width:0}
+.tag{font-size:.8rem;font-weight:700}
+.tag.g{color:var(--good)} .tag.b{color:var(--bad)}
+@media (max-height:640px){main{padding-block:12px 20px}section{gap:12px}}
+</style>
+
+<main>
+  <section id="start">
+    <h1>万国旗<br>メモリー</h1>
+    <div class="bunting" id="bunting" aria-hidden="true"></div>
+    <ol class="rules">
+      <li><b>覚える</b><span>10枚の国旗が1秒ずつ表示されます。同じ順番で3周、合計30秒。</span></li>
+      <li><b>選ぶ</b><span>25枚の中から、さっき見た5枚を30秒以内に選びます。時間切れになると、その時点の選択で答え合わせします。</span></li>
+    </ol>
+    <button class="primary" id="go" disabled>国旗を読み込み中…</button>
+    <p class="muted" id="note" role="status"></p>
+  </section>
+
+  <section id="memo" hidden>
+    <div class="head"><h2 id="lapLabel">よーい</h2><span class="muted num" id="cardNo"></span></div>
+    <div class="stage"><span class="count" id="count"></span><img id="flash" alt="覚える国旗" hidden></div>
+    <div class="laps" id="laps" aria-hidden="true"></div>
+    <button class="text" id="quit">中止して最初に戻る</button>
+  </section>
+
+  <section id="pick" hidden>
+    <div class="head"><h2>見た国旗を5枚選ぶ</h2><span class="clock num" id="clock" role="timer">残り30秒</span></div>
+    <div class="timebar" aria-hidden="true"><i id="timeFill"></i></div>
+    <div class="grid" id="board"></div>
+    <button class="primary num" id="submit" disabled></button>
+  </section>
+
+  <section id="result" hidden>
+    <div><p class="score num" id="score" tabindex="-1"></p><p id="verdict"></p><p class="muted num" id="best"></p></div>
+    <div class="grid" id="review"></div>
+    <p class="muted">✓ 正解　× まちがい　点線は選び逃した正解</p>
+    <button class="primary" id="again">もう一回あそぶ</button>
+    <h2>覚える10枚（表示された順）</h2>
+    <ol class="answers" id="answers"></ol>
+    <div id="wrongBox"><h2>まちがえて選んだ国旗</h2><ol class="answers" id="wrongList"></ol></div>
+  </section>
+</main>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const MEMO = 10, LAPS = 3, TARGETS = 5, BOARD = 25, CARD_MS = 1000, GAP_MS = 120, ANSWER_MS = 30000;
+  const TWINS = [['id','mc'],['td','ro']]; // 画像で見分けられない組は同じゲームに出さない
+  let flags = [], game = null, timers = [], tick = null;
+
+  const shuffle = a => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+  const later = (fn, ms) => timers.push(setTimeout(fn, ms));
+  const stop = () => { timers.forEach(clearTimeout); timers = []; clearInterval(tick); };
+  const show = id => { ['start','memo','pick','result'].forEach(s => $(s).hidden = s !== id); window.scrollTo(0, 0); };
+  const img = (f, alt) => { const i = new Image(); i.src = f.src; i.alt = alt; return i; };
+
+  function deal() {
+    const used = new Set(), picked = [];
+    for (const f of shuffle(flags)) {
+      if (TWINS.some(p => p.includes(f.code) && p.some(c => used.has(c)))) continue;
+      used.add(f.code); picked.push(f);
+      if (picked.length === MEMO + BOARD - TARGETS) break;
+    }
+    const memo = picked.slice(0, MEMO);
+    const targets = shuffle(memo).slice(0, TARGETS);
+    const board = shuffle(targets.concat(picked.slice(MEMO)));
+    return { memo, targets: new Set(targets.map(f => f.code)), board, chosen: new Set(), t0: 0 };
+  }
+
+  async function begin() {
+    stop(); game = deal(); const g = game;
+    $('note').textContent = '';
+    $('go').disabled = true;
+    await Promise.all(g.memo.concat(g.board).map(f => img(f, '').decode().catch(() => {})));
+    $('go').disabled = false;
+    if (game !== g) return;
+    $('laps').innerHTML = ('<div class="lap">' + '<i></i>'.repeat(MEMO) + '</div>').repeat(LAPS);
+    $('flash').hidden = true; $('count').hidden = false; $('cardNo').textContent = '';
+    $('lapLabel').textContent = 'よーい';
+    show('memo');
+    [3, 2, 1].forEach((n, i) => later(() => $('count').textContent = n, i * 700));
+    later(() => run(performance.now(), 0), 2100);
+  }
+
+  // 開始時刻を基準に次の予約を入れ、30秒の中でずれが積もらないようにする
+  function run(t0, n) {
+    if (n === MEMO * LAPS) return startPick();
+    const i = n % MEMO, lap = Math.floor(n / MEMO);
+    $('count').hidden = true;
+    $('flash').src = game.memo[i].src; $('flash').hidden = false;
+    $('lapLabel').textContent = `${lap + 1}周目 / ${LAPS}周`;
+    $('cardNo').textContent = `${i + 1} / ${MEMO}枚`;
+    $('laps').querySelectorAll('i')[n].className = 'on';
+    const end = t0 + (n + 1) * CARD_MS;
+    later(() => $('flash').hidden = true, Math.max(0, end - GAP_MS - performance.now()));
+    later(() => run(t0, n + 1), Math.max(0, end - performance.now()));
+  }
+
+  function startPick() {
+    stop();
+    $('board').replaceChildren(...game.board.map((f, i) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'card'; b.setAttribute('aria-pressed', 'false');
+      b.append(img(f, `国旗 ${i + 1}`));
+      b.onclick = () => toggle(b, f.code);
+      return b;
+    }));
+    update();
+    game.t0 = performance.now();
+    countdown();
+    tick = setInterval(countdown, 100);
+    show('pick');
+  }
+
+  function countdown() {
+    const left = Math.max(0, ANSWER_MS - (performance.now() - game.t0));
+    $('clock').textContent = `残り${Math.ceil(left / 1000)}秒`;
+    $('timeFill').style.transform = `scaleX(${left / ANSWER_MS})`;
+    $('pick').classList.toggle('hurry', left <= 10000);
+    if (left === 0) finish();
+  }
+
+  function toggle(b, code) {
+    if (performance.now() - game.t0 >= ANSWER_MS) return finish();
+    const c = game.chosen;
+    if (c.has(code)) c.delete(code); else if (c.size < TARGETS) c.add(code); else return;
+    const on = c.has(code);
+    b.classList.toggle('sel', on); b.setAttribute('aria-pressed', on);
+    if (on) b.dataset.mark = '✓'; else delete b.dataset.mark;
+    update();
+  }
+
+  function update() {
+    const n = game.chosen.size;
+    $('submit').disabled = n !== TARGETS;
+    $('submit').textContent = n === TARGETS ? '答え合わせをする' : `あと${TARGETS - n}枚選んでください`;
+  }
+
+  function finish() {
+    stop();
+    const elapsed = performance.now() - game.t0;
+    const timedOut = elapsed >= ANSWER_MS;
+    const sec = Math.min(elapsed, ANSWER_MS) / 1000;
+    const { chosen, targets } = game;
+    const score = [...chosen].filter(c => targets.has(c)).length;
+    $('score').textContent = `${score} / ${TARGETS}`;
+    const msg = score === 5 ? '全問正解！' : score === 4 ? 'あと1枚！' : score >= 2 ? 'いい線いってます。' : 'もう一回、挑戦してみましょう。';
+    $('verdict').textContent = timedOut ? `時間切れ！ ${msg}` : `${msg}（回答 ${sec.toFixed(1)}秒）`;
+
+    let best = null;
+    try { best = JSON.parse(localStorage.getItem('bankokki-best-30')); } catch {}
+    if (!best || score > best.score || (score === best.score && sec < best.sec)) {
+      best = { score, sec };
+      try { localStorage.setItem('bankokki-best-30', JSON.stringify(best)); } catch {}
+    }
+    $('best').textContent = `自己ベスト ${best.score} / ${TARGETS}・${Number(best.sec).toFixed(1)}秒`;
+
+    $('review').replaceChildren(...game.board.map(f => {
+      const d = document.createElement('div');
+      const t = targets.has(f.code), c = chosen.has(f.code);
+      d.className = 'card ' + (t && c ? 'hit' : t ? 'miss' : c ? 'wrong' : 'dim');
+      if (c) d.dataset.mark = t ? '✓' : '×';
+      d.title = f.name;
+      d.append(img(f, f.name + (t && c ? '（正解）' : t ? '（選び逃し）' : c ? '（まちがい）' : '')));
+      return d;
+    }));
+
+    const row = (f, no, tag, cls) => {
+      const li = document.createElement('li');
+      const a = document.createElement('span'); a.className = 'num muted'; a.textContent = no;
+      const n = document.createElement('span'); n.textContent = f.name;
+      const t = document.createElement('span'); t.className = 'tag ' + cls; t.textContent = tag;
+      li.append(a, img(f, ''), n, t); return li;
+    };
+    $('answers').replaceChildren(...game.memo.map((f, i) => {
+      if (!targets.has(f.code)) return row(f, i + 1, '', '');
+      const ok = chosen.has(f.code);
+      return row(f, i + 1, ok ? '正解' : '選び逃し', ok ? 'g' : 'b');
+    }));
+    const wrong = game.board.filter(f => chosen.has(f.code) && !targets.has(f.code));
+    $('wrongBox').hidden = !wrong.length;
+    $('wrongList').replaceChildren(...wrong.map(f => row(f, '×', '', '')));
+    show('result');
+    $('score').focus({ preventScroll: true });
+  }
+
+  function home(note) { stop(); game = null; show('start'); $('note').textContent = note || ''; }
+
+  $('go').onclick = begin;
+  $('again').onclick = () => { show('start'); begin(); };
+  $('submit').onclick = finish;
+  $('quit').onclick = () => home();
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && !$('memo').hidden) home('画面を離れたので中止しました。もう一度スタートしてください。');
+  });
+
+  function load() {
+    $('go').disabled = true; $('go').onclick = begin; $('go').textContent = '国旗を読み込み中…';
+    fetch('flags.json').then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(rows => {
+      flags = rows.map(([code, name, src]) => ({ code, name, src }));
+      $('bunting').replaceChildren(...shuffle(flags).slice(0, 5).map(f => img(f, '')));
+      $('go').textContent = 'スタート'; $('go').disabled = false;
+    }).catch(() => {
+      $('note').textContent = '国旗を読み込めませんでした。通信を確認して、もう一度読み込んでください。';
+      $('go').textContent = 'もう一度読み込む'; $('go').disabled = false; $('go').onclick = load;
+    });
+  }
+  load();
+})();
+</script>
+
+</body></html>
